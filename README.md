@@ -2,6 +2,10 @@
 
 This is a simple Todo List WebApp built with Python, Streamlit, and MySQL. It allows users to manage their tasks, group them, and manage their account. Administrators can also manage user accounts.
 
+## Example
+
+![Tasks](images/tasks.png)
+
 ## Setup
 
 Follow these steps to set up the Todo-WebApp:
@@ -52,3 +56,10 @@ CREATE TABLE tasks (
 );
 ```
 Bare in mind that the phone number is only 8 characters long because it's by default set to Danish phone numbers.
+
+## Screenshots
+
+![Login](images/login.png)
+![Tasks Edit](images/tasks_edit.png)
+![Admin View](images/admin_view.png)
+![Admin Edit](images/admin_edit.png)

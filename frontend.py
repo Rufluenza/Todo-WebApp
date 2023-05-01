@@ -8,15 +8,12 @@ from backend import (
 
 st.set_page_config(
     page_title="Todo List App",
-    #page_icon="💼",
+    #page_icon="💼", Insert your own page icon
 )
 
 send_text = False
 
 def main():
-    if st.button("Refresh (Debug)"):
-        st.experimental_rerun()
-
     if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False
         st.session_state.user = None
@@ -144,9 +141,7 @@ def user_tasks(user):
         st.session_state.task_entered = False
 
     if st.button("Add Task", key="add_task") or (st.session_state.task_entered and not st.session_state.task_added):
-        if user_task.strip() == '':
-            st.warning("Task name cannot be empty.")
-        else:
+        if user_task.strip() != '':
             add_task(user[0], user_task, selected_group_id)
             st.session_state.task_added = False
             st.session_state.task_entered = False
@@ -202,22 +197,25 @@ def admin_panel():
 
     # Display users in a table
     st.write(len(users), " users found")
+    selected_view_mode = st.radio("View mode", ["Edit", "Table"])
+    if selected_view_mode == "Table":
+        st.write(pd.DataFrame(users, columns=["ID", "Username", "Password", "Phone Number"]))
+    else:
+        for user in users:
+            user_id, username, _, phone_number = user
+            edit_col, delete_col, user_col = st.columns([1, 1, 8])
 
-    for user in users:
-        user_id, username, _, phone_number = user
-        edit_col, delete_col, user_col = st.columns([1, 1, 8])
+            with edit_col:
+                if st.button("Edit", key=f'edit_{user_id}'):
+                    edit_user(user_id)
 
-        with edit_col:
-            if st.button("Edit", key=f'edit_{user_id}'):
-                edit_user(user_id)
+            with delete_col:
+                if st.button("Delete", key=f'delete_{user_id}'):
+                    delete_user(user_id)
+                    st.experimental_rerun()
 
-        with delete_col:
-            if st.button("Delete", key=f'delete_{user_id}'):
-                delete_user(user_id)
-                st.experimental_rerun()
-
-        with user_col:
-            st.write(f"ID: {user_id}, Username: {username}, Phone Number: {phone_number}")
+            with user_col:
+                st.write(f"ID: {user_id}, Username: {username}, Phone Number: {phone_number}")
 
 # Edit user function
 def edit_user(user_id):

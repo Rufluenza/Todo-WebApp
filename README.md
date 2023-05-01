@@ -38,21 +38,21 @@ CREATE TABLE users (
     phone_number VARCHAR(8)
 );
 
-CREATE TABLE groups (
+CREATE TABLE `groups` (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     group_name VARCHAR(255) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE tasks (
+CREATE TABLE `tasks` (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     task_name VARCHAR(255) NOT NULL,
     group_id INT,
     status TINYINT(1) DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (group_id) REFERENCES groups(id)
+    FOREIGN KEY (group_id) REFERENCES `groups`(id)
 );
 ```
 Bare in mind that the phone number is only 8 characters long because it's by default set to Danish phone numbers.

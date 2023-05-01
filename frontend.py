@@ -8,7 +8,7 @@ from backend import (
 
 st.set_page_config(
     page_title="Todo List App",
-    #page_icon="💼", Insert your own page icon
+    #page_icon="💼",
 )
 
 send_text = False

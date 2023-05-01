@@ -51,3 +51,4 @@ CREATE TABLE tasks (
     FOREIGN KEY (group_id) REFERENCES groups(id)
 );
 ```
+Bare in mind that the phone number is only 8 characters long because it's by default set to Danish phone numbers.

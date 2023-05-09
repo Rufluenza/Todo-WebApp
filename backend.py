@@ -5,8 +5,8 @@ from twilio.rest import Client
 def connect_db():
     return mysql.connector.connect(
         host="localhost",
-        user="Ruben",
-        password="informatik",
+        user="ruben_admin",
+        password="for admin in range",
         database="TodoWeb"
     )
 
@@ -18,7 +18,7 @@ def register_user(username, password, phone_number):
     connection = connect_db()
     cursor = connection.cursor()
     hashed_password = hash_password(password)
-    query = "INSERT INTO users (username, password, phone_number) VALUES (%s, %s, %s)"
+    query = "INSERT INTO `users` (`username`, `password`, `phone_number`) VALUES (%s, %s, %s)"
     cursor.execute(query, (username, hashed_password, phone_number))
     connection.commit()
     user_id = cursor.lastrowid
@@ -29,7 +29,7 @@ def register_user(username, password, phone_number):
 def login_user(username, password):
     connection = connect_db()
     cursor = connection.cursor()
-    query = "SELECT * FROM users WHERE username = %s"
+    query = "SELECT * FROM `users` WHERE `username` = %s"
     cursor.execute(query, (username,))
     user = cursor.fetchone()
     cursor.fetchall()
@@ -42,7 +42,7 @@ def login_user(username, password):
 def get_user_by_id(user_id):
     connection = connect_db()
     cursor = connection.cursor()
-    query = "SELECT * FROM users WHERE id = %s"
+    query = "SELECT * FROM `users` WHERE `id` = %s"
     cursor.execute(query, (user_id,))
     user = cursor.fetchone()
     cursor.close()
@@ -53,9 +53,9 @@ def update_user(user_id, new_username, new_password, new_phone_number):
     connection = connect_db()
     cursor = connection.cursor()
     cursor.execute("""
-        UPDATE users
-        SET username = ?, password = ?, phone_number = ?
-        WHERE id = ?
+        UPDATE `users`
+        SET `username` = ?, `password` = ?, `phone_number` = ?
+        WHERE `id` = ?
     """, (new_username, new_password, new_phone_number, user_id))
     cursor.close()
     connection.commit()
@@ -66,7 +66,7 @@ def update_user(user_id, new_username, new_password, new_phone_number):
 def add_task(user_id, task, group_id=None):
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO tasks (user_id, task, status, group_id) VALUES (%s, %s, %s, %s)", (user_id, task, 0, group_id))
+    cursor.execute("INSERT INTO `tasks` (`user_id`, `task`, `status`, `group_id`) VALUES (%s, %s, %s, %s)", (user_id, task, 0, group_id))
     connection.commit()
     connection.close()
 
@@ -74,7 +74,7 @@ def get_tasks(user_id, group_id):
     connection = connect_db()
     cursor = connection.cursor()
     if group_id is None:
-        cursor.execute("SELECT * FROM tasks WHERE user_id=%s AND group_id IS NULL", (user_id,))
+        cursor.execute("SELECT * FROM `tasks` WHERE `user_id`=%s AND `group_id` IS NULL", (user_id,))
     else:
         cursor.execute("SELECT * FROM tasks WHERE user_id=%s AND group_id=%s", (user_id, group_id))
     tasks = cursor.fetchall()
@@ -84,7 +84,7 @@ def get_tasks(user_id, group_id):
 def update_task_status(task_id, status):
     connection = connect_db()
     cursor = connection.cursor()
-    query = "UPDATE tasks SET status = %s WHERE id = %s"
+    query = "UPDATE `tasks` SET `status` = %s WHERE `id` = %s"
     cursor.execute(query, (status, task_id))
     connection.commit()
     cursor.close()
@@ -93,7 +93,7 @@ def update_task_status(task_id, status):
 def update_task_name(task_id, new_task_name):
     connection = connect_db()
     cursor = connection.cursor()
-    query = "UPDATE tasks SET task = %s WHERE id = %s"
+    query = "UPDATE `tasks` SET `task` = %s WHERE `id` = %s"
     cursor.execute(query, (new_task_name, task_id))
     connection.commit()
 
@@ -101,7 +101,7 @@ def update_task_name(task_id, new_task_name):
 def delete_task(task_id):
     connection = connect_db()
     cursor = connection.cursor()
-    query = "DELETE FROM tasks WHERE id = %s"
+    query = "DELETE FROM `tasks` WHERE `id` = %s"
     cursor.execute(query, (task_id,))
     connection.commit()
 
@@ -109,15 +109,17 @@ def delete_task(task_id):
 def create_group(user_id, group_name):
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO groups (user_id, group_name) VALUES (%s, %s)", (user_id, group_name))
+    cursor.execute("INSERT INTO `groups` (`user_id`, `group_name`) VALUES (%s, %s)", (user_id, group_name))
     connection.commit()
+    new_group_id = cursor.lastrowid
     cursor.close()
     connection.close()
+    return new_group_id
 
 def update_group(group_id, new_group_name):
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("UPDATE groups SET group_name=%s WHERE id=%s", (new_group_name, group_id))
+    cursor.execute("UPDATE `groups` SET `group_name`=%s WHERE `id`=%s", (new_group_name, group_id))
     connection.commit()
     cursor.close()
     connection.close()
@@ -127,11 +129,11 @@ def delete_group(group_id):
     cursor = connection.cursor()
 
     # Delete all tasks within the group
-    query = "DELETE FROM tasks WHERE group_id = %s"
+    query = "DELETE FROM `tasks` WHERE `group_id` = %s"
     cursor.execute(query, (group_id,))
 
     # Delete the group
-    query = "DELETE FROM groups WHERE id = %s"
+    query = "DELETE FROM `groups` WHERE `id` = %s"
     cursor.execute(query, (group_id,))
 
     connection.commit()
@@ -142,7 +144,7 @@ def delete_group(group_id):
 def get_groups(user_id):
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM groups WHERE user_id=%s", (user_id,))
+    cursor.execute("SELECT * FROM `groups` WHERE `user_id`=%s", (user_id,))
     groups = cursor.fetchall()
     cursor.close()
     connection.close()
@@ -151,7 +153,7 @@ def get_groups(user_id):
 def create_default_group(user_id):
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO groups (user_id, group_name) VALUES (%s, %s)", (user_id, "Default"))
+    cursor.execute("INSERT INTO `groups` (`user_id`, `group_name`) VALUES (%s, %s)", (user_id, "Default"))
     connection.commit()
     cursor.close()
     connection.close()
@@ -160,7 +162,7 @@ def create_default_group(user_id):
 def get_all_users():
     connection = connect_db()
     cursor = connection.cursor()
-    query = "SELECT * FROM users"
+    query = "SELECT * FROM `users`"
     #query = "SELECT id, username, password FROM users"
     cursor.execute(query)
     users = cursor.fetchall()
@@ -176,31 +178,31 @@ def delete_user(user_id):
 
     # Delete tasks related to the user's groups
     query_tasks_group = """
-    DELETE FROM tasks
-    WHERE group_id IN (
-        SELECT id FROM groups WHERE user_id = %s
+    DELETE FROM `tasks`
+    WHERE `group_id` IN (
+        SELECT `id` FROM `groups` WHERE `user_id` = %s
     );
     """
     cursor.execute(query_tasks_group, (user_id,))
 
     # Delete tasks directly related to the user
     query_tasks_user = """
-    DELETE FROM tasks
-    WHERE user_id = %s;
+    DELETE FROM `tasks`
+    WHERE `user_id` = %s;
     """
     cursor.execute(query_tasks_user, (user_id,))
 
     # Delete groups
     query_groups = """
-    DELETE FROM groups
-    WHERE user_id = %s;
+    DELETE FROM `groups`
+    WHERE `user_id` = %s;
     """
     cursor.execute(query_groups, (user_id,))
 
     # Delete user
     query_user = """
-    DELETE FROM users
-    WHERE id = %s;
+    DELETE FROM `users`
+    WHERE `id` = %s;
     """
     cursor.execute(query_user, (user_id,))
 
@@ -214,28 +216,28 @@ def delete_user(user_id):
 def delete_all_tasks_of_user(user_id):
     connection = connect_db()
     cursor = connection.cursor()
-    query = "DELETE FROM tasks WHERE user_id = %s"
+    query = "DELETE FROM `tasks` WHERE `user_id` = %s"
     cursor.execute(query, (user_id,))
     connection.commit()
 
 def delete_all_tasks_of_group(group_id):
     connection = connect_db()
     cursor = connection.cursor()
-    query = "DELETE FROM tasks WHERE group_id = %s"
+    query = "DELETE FROM `tasks` WHERE `group_id` = %s"
     cursor.execute(query, (group_id,))
     connection.commit()
 
 def delete_all_groups_of_user(user_id):
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM groups WHERE user_id = %s", (user_id,))
+    cursor.execute("SELECT * FROM `groups` WHERE `user_id` = %s", (user_id,))
     groups = cursor.fetchall()
 
     for group in groups:
         group_id = group[0]
         delete_all_tasks_of_group(group_id)
 
-    query = "DELETE FROM groups WHERE user_id = %s AND group_name != 'Default'"
+    query = "DELETE FROM `groups` WHERE `user_id` = %s AND `group_name` != 'Default'"
     cursor.execute(query, (user_id,))
     connection.commit()
     cursor.close()
@@ -259,8 +261,7 @@ def send_sms_on_delete(user_id):
     # send a sms if a user is deleted
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+    cursor.execute("SELECT * FROM `users` WHERE `id` = %s", (user_id,))
     user = cursor.fetchone()
     cursor.close()
     connection.close()
-    

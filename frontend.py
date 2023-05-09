@@ -2,10 +2,9 @@ import streamlit as st
 import pandas as pd
 from backend import (
     register_user, login_user, add_task, get_tasks, update_task_status, delete_task, update_task_name, get_user_by_id,
-    create_group, update_group, delete_group, get_groups, create_default_group, 
+    create_group, update_group, delete_group, get_groups, create_default_group,
     get_all_users, delete_user, send_sms, update_user
 )
-
 st.set_page_config(
     page_title="Todo List App",
     #page_icon="💼",
@@ -48,7 +47,7 @@ def main():
 
         elif choice == "Sign Up":
             st.subheader("Create a new account")
-            
+
             if 'new_password_entered' not in st.session_state:
                 st.session_state.new_password_entered = False
 
@@ -94,8 +93,8 @@ def user_groups(user):
         selected_group_id = None
     else:
         selected_group_id = group_mapping[selected_group_name]
-    
-    if st.sidebar.button("Create Group"):
+
+    if st.sidebar.button("Create Group") or st.session_state.group_interacted:
         new_group_name = st.sidebar.text_input("Add a new group", key="group_input", on_change=lambda: setattr(st.session_state, 'group_interacted', True))
         if st.session_state.group_interacted:
             if new_group_name.strip() == '':
@@ -103,31 +102,33 @@ def user_groups(user):
             elif new_group_name in group_names:
                 st.sidebar.warning("Group name already exists.")
             else:
-                create_group(user[0], new_group_name)
+                new_group_id = create_group(user[0], new_group_name)
                 st.session_state.group_interacted = False
+                selected_group_id = new_group_id
+                selected_group_name = new_group_name
                 st.experimental_rerun()
 
-    if st.sidebar.button("Rename Group"):
-        new_group_name = st.sidebar.text_input("Enter new group name", key="group_input")
-        if new_group_name.strip() == '':
-            st.sidebar.warning("Group name cannot be empty.")
-        elif new_group_name in group_names:
-            st.sidebar.warning("Group name already exists.")
-        else:
-            update_group(selected_group_id, new_group_name)
-            st.experimental_rerun()
+    if selected_group_name is not None:
+        if st.sidebar.button("Rename Group"):
+            new_group_name = st.sidebar.text_input("Enter new group name", key="group_input")
+            if new_group_name.strip() == '':
+                st.sidebar.warning("Group name cannot be empty.")
+            elif new_group_name in group_names:
+                st.sidebar.warning("Group name already exists.")
+            else:
+                update_group(selected_group_id, new_group_name)
+                st.experimental_rerun()
 
-    if st.sidebar.button("Delete Group"):
-        if selected_group_name == "Default":
-            st.sidebar.warning("Cannot delete default group")
-        elif selected_group_id is not None:
-            delete_group(selected_group_id)
-            st.experimental_rerun()
-        else:
-            st.sidebar.warning("Invalid group selected")
+        if st.sidebar.button("Delete Group"):
+            if selected_group_name == "Default":
+                st.sidebar.warning("Cannot delete default group")
+            elif selected_group_id is not None:
+                delete_group(selected_group_id)
+                st.experimental_rerun()
+            else:
+                st.sidebar.warning("Invalid group selected")
 
     return selected_group_name, selected_group_id
-
 
 def user_tasks(user):
     if 'task_added' not in st.session_state:
@@ -139,6 +140,7 @@ def user_tasks(user):
     user_task = st.text_input("Enter a new task", key="task_input", on_change=lambda: setattr(st.session_state, 'task_entered', True))
     if 'task_entered' not in st.session_state:
         st.session_state.task_entered = False
+        st.experimental_rerun()
 
     if st.button("Add Task", key="add_task") or (st.session_state.task_entered and not st.session_state.task_added):
         if user_task.strip() != '':
